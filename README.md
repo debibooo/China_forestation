@@ -7,4 +7,4 @@ Data processing and plotting code for unpublished paper "Land squeeze implied in
 3. calculating national habitat quality index mean value
 4. calculating national population at risk of hunger
 
-**Part-B:graphic plotting **
+**Part-B:graphic plotting**
