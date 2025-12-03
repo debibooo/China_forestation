@@ -1,5 +1,5 @@
 # China_forestation
-Data processing and plotting code for unpublished paper "Land squeeze implied in China’s forestation commitments".
+Data processing and plotting code for published paper "Sustainability nexus in China’s forestation initiatives".
 
 **Part-A: data process**
 1. calculating forestation area (potential forest area-existing forest area)
@@ -9,3 +9,4 @@ Data processing and plotting code for unpublished paper "Land squeeze implied in
 5. calculating national mean value of Mean species abundance MSA idex
 
 **Part-B: graphic plotting**
+
