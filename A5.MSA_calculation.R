@@ -14,8 +14,6 @@ csv_files <- list.files(pattern = "\\.csv$", full.names = TRUE)
 
 for (csv_path in csv_files) {
   fname <- basename(csv_path)
-  cat(">>> 处理", fname, "...\n")
-  
 
   df <- read.csv(csv_path, row.names = 1, check.names = FALSE)
   colnames(df) <- as.numeric(colnames(df))
