@@ -7,21 +7,18 @@ library(ggpubr)
 library(cowplot)  
 library(purrr) 
 
-path="/Volumes/UCL/论文工作/forestation/my_output_folder/forestation/sustainability_3otherindex.xlsx"
+path="/sustainability_3otherindex.xlsx"
 
 common_scales <- list(
   scale_x_continuous(limits = c(2020,2100), breaks = seq(2020,2100,20)),
-  scale_y_continuous(limits = c(-2,5), breaks = seq(-2,5,2))  # 视需要微调
+  scale_y_continuous(limits = c(-2,5), breaks = seq(-2,5,2))  
 )
 
 
-
-# 1. 先读取 netzero sheet，拿到 Sector 的原始顺序
 sector_order <- read_xlsx(path, sheet = "netzero") %>%
   pull(Sector) %>%
   unique()
 
-# 1. 先把两个 sheet 各自读成长表，并加上 file 标记
 read_and_pivot <- function(path, sheet_name){
   read_xlsx(path, sheet = sheet_name) %>%
     pivot_longer(
@@ -31,12 +28,12 @@ read_and_pivot <- function(path, sheet_name){
     ) %>%
     mutate(
       Year = as.integer(Year),
-      file = sheet_name               # 先把 sheet_name 赋给 file
+      file = sheet_name              
     ) %>%
     mutate(
       Sector = factor(Sector, levels = sector_order),
       
-      file = factor(file,             # 再把 file 转成 factor，指定顺序
+      file = factor(file,            
                     levels = c("netzero", "afforest"))
     )
 }
@@ -51,12 +48,12 @@ df_long %>%
   select(Sector, Year, delta) %>%
   print(n = Inf)
 
-# 2. 计算 net_delta
+
 net_data <- df_long %>%
   group_by(file, Year) %>%
   summarise(net_delta = sum(delta), .groups="drop")
 
-#计算lulucf的net—delta
+
 
 net_data2 <- df_long %>%
   filter(Sector %in% c("forest", "lulucf")) %>%
@@ -66,7 +63,7 @@ net_data2 <- df_long %>%
     .groups = "drop"
   )
 
-# 3. 给分面取中文/plotmath 名称（可选）
+
 custom_titles <- c(
 netzero  = "NetZero",
   afforest = "Afforest",  
@@ -76,7 +73,7 @@ netzero  = "NetZero",
   
 )
 
-# 4. 按 file 拆出每个子图
+
 plots <- df_long %>%
   split(.$file) %>%
   imap(~ {
@@ -110,13 +107,13 @@ plots <- df_long %>%
         plot.title      = element_text(face="bold", size=12),
         axis.text       = element_text(size=7),
         axis.title      = element_text(size=7),
-        legend.position = "right",           # 把 legend 放到右侧
-        legend.direction = "vertical" ,       # 竖直排列
-        legend.title     = element_text(size = 8),  # 图例标题文字大小
-        legend.text      = element_text(size = 7)   # 图例标签文字大小
+        legend.position = "right",           
+        legend.direction = "vertical" ,       
+        legend.title     = element_text(size = 8),  
+        legend.text      = element_text(size = 7)   
  
       )       
-    # 针对两个子图分别添加不同注记
+
         if (.y == "netzero") {
           p <- p +
             annotate(
@@ -264,65 +261,47 @@ legend_only <- get_legend(
     )
 )
 
-
-# 3. 再把实际的子图（不带 legend）并排
 panels_only <- ggarrange(
   plotlist      = plots,
-  ncol          = 2,    # 每行 3 张
-  nrow          = 1,    # 总共 2 行
-  common.legend = FALSE,   # 取消公用 legend
+  ncol          = 2,    
+  nrow          = 1,    
+  common.legend = FALSE,  
   legend        = "none"
 )
 
-# 4. 最后用 cowplot::plot_grid 按比例拼回去
-#    rel_widths = c(0.8, 0.2) 表示：绘图区占 80%，图例占 20%
+
 final_plot <- plot_grid(
-  panels_only,   # 左边是三幅 panel
-  legend_only,   # 右边是 legend
+  panels_only,   
+  legend_only,   
   ncol         = 2,
   rel_widths   = c(0.9, 0.3)
 )
 
 print(final_plot)
 
-# 6. 保存
-
 ggsave(
-  filename = "/Volumes/UCL/论文工作/forestation/my_output_folder/plots/fig3/Emission_by_sector2.png",  # 输出文件名
-  plot     = final_plot,                    # ggplot 对象
+  filename = "/Emission_by_sector2.png", 
+  plot     = final_plot,                   
   device   = "png",
-  width    = 180,                  # 宽度 183 mm（双栏）
-  height   = 90,                   # 高度 90 mm
-  units    = "mm",                 # 单位 mm
-  dpi      = 600                   # 分辨率 300 dpi
+  width    = 180,                  
+  height   = 90,                   
+  units    = "mm",                 
+  dpi      = 600                   
 )
 
 
 
-
-
-
-
-
-
-
-
-
-##### net c uptake
-
-# 1. 读入并转成长表
 df_long3 <- read_xlsx(path, sheet = "netcuptake") %>%
   pivot_longer(
-    cols      = -1,                     # 除了第 1 列以外
+    cols      = -1,                    
     names_to  = "Year", 
     values_to = "Value"
   ) %>%
-  rename(Scenario = 1) %>%              # 把第一列重命名为 Scenario
+  rename(Scenario = 1) %>%              
   mutate(
     Year = as.integer(Year)
   )
 
-# 2. 再 pivot_wider 回变成一列年份＋两条线各自的值
 df_wide <- df_long3 %>%
   pivot_wider(
     names_from  = Scenario,
@@ -330,12 +309,11 @@ df_wide <- df_long3 %>%
   )
 
 
-# 3. 用 ggplot 画图：两条线＋中间 ribbon 填色＋垂直虚线 x=2060
+
 p3 <- ggplot(df_wide, aes(x = Year)) +
-  # 填充两条线之间的区域（假设 NetZero 在下面，Afforest 在上面；若顺序相反请调换 ymin/ymax）
+
   geom_ribbon(aes(ymin = NetZero, ymax = Afforest),
               fill = "#0077b6", alpha = 0.3) +
-  # 两条线
   geom_line(aes(y = NetZero),   color = "#b39cd0",  size = 1 ,linetype = "dashed",) +
   geom_line(aes(y = Afforest),  color = "#0077b6", size = 1) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "grey") +
@@ -355,39 +333,39 @@ p3 <- ggplot(df_wide, aes(x = Year)) +
   )+
   annotate(
     "text",
-    x       = 2100,            # 右边界
-    y       = 4.5,              # 上边界
+    x       = 2100,            
+    y       = 4.5,              
     label   =bquote(NetZero~.(60.9)~Pg~C),
-    hjust   = 1,               # 文字右对齐
-    vjust   = 1,               # 文字顶对齐
-    size    = 4,               # 字号（可调）
+    hjust   = 1,               
+    vjust   = 1,               
+    size    = 4,               
 
-    fontface= "bold.italic",         # 字体风格（可选）
+    fontface= "bold.italic",         
     color="#b39cd0"
   )+
   annotate(
     "text",
-    x       = 2100,            # 右边界
-    y       = 5,              # 上边界
+    x       = 2100,            
+    y       = 5,            
     label   =bquote(Afforest~.(68.2)~Pg~C),
-    hjust   = 1,               # 文字右对齐
-    vjust   = 1,               # 文字顶对齐
-    size    = 4,               # 字号（可调）
+    hjust   = 1,               
+    vjust   = 1,               
+    size    = 4,               
 
-    fontface= "bold.italic",         # 字体风格（可选）
+    fontface= "bold.italic",        
     color="#0077b6"
   )
 
 
 print(p3)
 ggsave(
-  filename = "/Volumes/UCL/论文工作/forestation/my_output_folder/plots/fig3/netcuptake2.png",  # 输出文件名
-  plot     = p3,                    # ggplot 对象
+  filename = "/netcuptake.png", 
+  plot     = p3,                  
   device   = "png",
-  width    = 67.5,                  # 宽度 183 mm（双栏）
-  height   = 90,                   # 高度 90 mm
-  units    = "mm",                 # 单位 mm
-  dpi      = 600                   # 分辨率 300 dpi
+  width    = 67.5,                  
+  height   = 90,                   
+  units    = "mm",                
+  dpi      = 600                  
 )
 
 
