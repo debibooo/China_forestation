@@ -4,13 +4,11 @@ library(tidyr)
 library(ggplot2)
 library(viridis)
 
-
-# 情景名称
 scenarios <- c("REF", "NetZero", "Afforest", "DietShift", "YieldUp", "SusCrop")
 
-# 读取并整合数据
+
 data_all <- lapply(scenarios, function(sheet) {
-  df <- read_excel("/Volumes/UCL/论文工作/forestation/my_output_folder/plots/S10/compare.xlsx", sheet = sheet)
+  df <- read_excel("compare.xlsx", sheet = sheet)
   df <- df %>%
     pivot_longer(-1, names_to = "Year", values_to = "delta") %>%
     rename(category = 1) %>%
@@ -24,24 +22,22 @@ data_all <- lapply(scenarios, function(sheet) {
 data_all$file <- factor(data_all$file, levels = c("REF", "NetZero", "Afforest", "DietShift", "YieldUp", "SusCrop"))
 
 
-# 自定义 legend 中的分类顺序（可根据你实际的分类调整顺序）
 desired_order <- c(
   "StapleCrops", "CashCrops", "FruitVeg", "OtherCrops", "Pasture", "Grassland",
   "ManagedForest", "UnmanagedForest", "Legumes", "ShrubTundra", "Urban", "Biomass"
 )
 data_all$category <- factor(data_all$category, levels = desired_order)
 
-# 净变化线
+
 net_data <- data_all %>%
   group_by(file, Year) %>%
   summarise(net_delta = sum(delta, na.rm = TRUE), .groups = "drop")
 
-# 自动设置时间轴范围
+
 min_year <- min(data_all$Year, na.rm = TRUE)
 max_year <- max(data_all$Year, na.rm = TRUE)
 xbreaks1 <- seq(min_year, max_year, by = 40)
 
-# 自定义标题（可美化）
 custom_titles <- c(
   REF = "REF",
   NetZero = "NetZero",
@@ -51,7 +47,7 @@ custom_titles <- c(
   SusCrop = "SustCrop"
 )
 
-# 主图
+
 p_area_leg <- ggplot(data_all, aes(x = Year, y = delta, fill = category)) +
   geom_area(alpha = 0.8, color = NA) +
   geom_hline(yintercept = 0, color = "grey", size = 0.8, alpha = 0.8) +
@@ -92,14 +88,10 @@ p_area_leg <- ggplot(data_all, aes(x = Year, y = delta, fill = category)) +
     fill = guide_legend(title.position = "top",nrow = 2)
   )
 
-# 显示图像
 print(p_area_leg)
 
 
-ggsave("/Volumes/UCL/论文工作/forestation/my_output_folder/plots/S10/LUC_emissions_area_plot.png", 
+ggsave("LUC_emissions_area_plot.png", 
        p_area_leg, 
-       device   = "png",
-       width    = 180,                  # 宽度 183 mm（双栏）
-       height   = 120,                   # 高度 90 mm
-       units    = "mm",                 # 单位 mm
-       dpi      = 600 )                  # 分辨率 300 dpi)
+       device   = "png",           
+       dpi      = 600 )                  
