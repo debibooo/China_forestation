@@ -1,5 +1,5 @@
 # China_forestation
-Data processing and plotting code for published paper "Sustainability nexus in China’s forestation initiatives".
+Data processing and plotting code for published paper "Sustainability nexus in China’s forestation initiatives" in Nexus journal.
 
 **Part-A: data process**
 1. calculating forestation area (potential forest area-existing forest area)
