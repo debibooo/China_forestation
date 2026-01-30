@@ -1,5 +1,5 @@
 # China_forestation
-Data processing and plotting code for published paper "Sustainability nexus in China’s forestation initiatives" in Nexus journal.
+Data processing and plotting code for our published paper "Sustainability nexus in China’s forestation initiatives" in Nexus journal.
 DOI:10.1016/j.ynexs.2025.100106 
 
 **Part-A: data process**
@@ -11,3 +11,4 @@ DOI:10.1016/j.ynexs.2025.100106
 
 **Part-B: graphic plotting**
 
+If you have any question, please contact shiyu.deng.23@ucl.ac.uk
